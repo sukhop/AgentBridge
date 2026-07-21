@@ -1,0 +1,9 @@
+node_modules/
+.wwebjs_auth/
+.env
+logs/*.log
+screenshots/*
+storage/*.json
+storage/*.jsonl
+storage/*.sqlite
+storage/*.sqlite-*

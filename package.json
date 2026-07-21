@@ -1,0 +1,38 @@
+{
+  "name": "agremote",
+  "version": "1.0.0",
+  "description": "Control an Antigravity AI coding session from Telegram.",
+  "type": "module",
+  "main": "app.js",
+  "bin": {
+    "agentbridge": "./bin/agentbridge.js"
+  },
+  "scripts": {
+    "start": "node bin/agentbridge.js start",
+    "dev": "node --watch bin/agentbridge.js start",
+    "test": "node --test tests/*.test.js",
+    "lint": "node scripts/check-syntax.js"
+  },
+  "keywords": [
+    "antigravity",
+    "telegram",
+    "automation",
+    "desktop"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@nut-tree-fork/nut-js": "^4.2.6",
+    "clipboardy": "^4.0.0",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "js-yaml": "^5.2.1",
+    "node-screenshots": "^0.2.8",
+    "node-telegram-bot-api": "^0.66.0",
+    "playwright": "^1.49.1",
+    "sharp": "^0.33.5",
+    "socket.io": "^4.8.1",
+    "systeminformation": "^5.23.8",
+    "winston": "^3.17.0"
+  }
+}

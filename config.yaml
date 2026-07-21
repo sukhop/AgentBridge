@@ -1,0 +1,22 @@
+telegram:
+  botToken: 123456:dummy_token
+  authorizedChatId: ''
+  polling: true
+  debugAuth: false
+agent:
+  default: antigravity
+screenshotPath: screenshots
+logLevel: info
+deployCommand: ''
+server:
+  port: 3030
+  corsOrigin: '*'
+monitor:
+  intervalMs: 5000
+antigravity:
+  windowHint: Antigravity
+  cdpUrl: ''
+  promptShortcut: Control+L
+  terminalShortcut: Control+`
+  conversationShortcut: Control+Shift+C
+  executablePath: antigravity
