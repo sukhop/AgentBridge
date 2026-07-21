@@ -1,8 +1,7 @@
 import express from 'express';
 import http from 'node:http';
 import { Server as SocketServer } from 'socket.io';
-import dotenv from 'dotenv';
-dotenv.config();
+import 'dotenv/config';
 
 import { loadConfig } from './config/config.js';
 import { createLogger } from './utils/logger.js';

@@ -110,12 +110,23 @@ AUTHORIZED_CHAT_ID=${chatId}
       return;
     }
 
+    console.log(`\n--- Received update: "${text}" from Chat ${message.chat.id} ---`);
+    const parsed = this.router.parser ? this.router.parser.parse(text) : { name: text.startsWith('/') ? text.split(/\s+/)[0].replace(/^\//, '').split('@')[0].toLowerCase() : 'prompt' };
+    console.log(`Parsed command: ${parsed.name}`);
+    const handler = this.router.handlers ? this.router.handlers.get(parsed.name) : null;
+    console.log(`Selected handler: ${handler ? handler.name : 'none'}`);
+
+    const activeSession = this.sessionManager ? this.sessionManager.getActiveSession() : null;
+    console.log(`Session ID: ${activeSession ? activeSession.id : 'none'}`);
+    console.log(`Workspace: ${activeSession ? activeSession.projectName : 'none'}`);
+
     const response = await this.router.handle({
       text,
       sender: String(message.chat.id),
       meta: { telegramMessage: message }
     });
     await this.sendResponse(message.chat.id, response);
+    console.log('Telegram response sent\n');
   }
 
   async handleCallbackQuery(query) {
@@ -155,12 +166,23 @@ AUTHORIZED_CHAT_ID=${chatId}
     await this.bot.answerCallbackQuery(query.id);
     const commandText = sessionId ? `${baseCommand} ${sessionId}` : baseCommand;
 
+    console.log(`\n--- Received update (Callback Button): "${query.data}" from Chat ${chatId} ---`);
+    const parsed = this.router.parser ? this.router.parser.parse(commandText) : { name: commandText.split(' ')[0] };
+    console.log(`Parsed command: ${parsed.name}`);
+    const handler = this.router.handlers ? this.router.handlers.get(parsed.name) : null;
+    console.log(`Selected handler: ${handler ? handler.name : 'none'}`);
+    console.log(`Session ID: ${sessionId || 'none'}`);
+
+    const targetSession = this.sessionManager ? ((this.sessionManager.sessions ? this.sessionManager.sessions.get(sessionId) : null) || this.sessionManager.getActiveSession()) : null;
+    console.log(`Workspace: ${targetSession ? targetSession.projectName : 'none'}`);
+
     const response = await this.router.handle({
       text: commandText,
       sender: String(chatId),
       meta: { telegramCallbackQuery: query }
     });
     await this.sendResponse(chatId, response);
+    console.log('Telegram response sent\n');
   }
 
   async sendNotification(event) {
@@ -172,6 +194,9 @@ AUTHORIZED_CHAT_ID=${chatId}
 
     this.logger.debug('TelegramService dispatching notification to user', { chatId: this.authorizedChatId, text: event.text });
 
+    console.log(`[DIAGNOSTICS] Telegram sendMessage invoked for event type: ${event.type}`);
+
+    let p;
     if (event.type === 'approval-required' && event.session) {
       const keyboard = {
         reply_markup: {
@@ -187,11 +212,18 @@ AUTHORIZED_CHAT_ID=${chatId}
           ]
         }
       };
-      await this.bot.sendMessage(this.authorizedChatId, event.text, keyboard);
-      return;
+      p = this.bot.sendMessage(this.authorizedChatId, event.text, keyboard);
+    } else {
+      p = this.bot.sendMessage(this.authorizedChatId, event.text);
     }
 
-    await this.bot.sendMessage(this.authorizedChatId, event.text);
+    try {
+      const res = await p;
+      console.log(`[DIAGNOSTICS] Telegram API response received: SUCCESS (Message ID: ${res.message_id})\n`);
+    } catch (err) {
+      console.log(`[DIAGNOSTICS] Telegram API response received: FAILED (${err.message})\n`);
+      throw err;
+    }
   }
 
   async sendResponse(chatId, response) {
@@ -258,6 +290,8 @@ AUTHORIZED_CHAT_ID=${chatId}
       { command: 'deploy', description: 'Run configured deploy command' },
       { command: 'branch', description: 'Show current branch' },
       { command: 'sessions', description: 'List active project sessions' },
+      { command: 'projects', description: 'List registered workspaces and status' },
+      { command: 'use', description: 'Switch active workspace project' },
       { command: 'open', description: 'Open and register a project' }
     ]);
   }

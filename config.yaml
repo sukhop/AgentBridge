@@ -1,10 +1,14 @@
 telegram:
-  botToken: 123456:dummy_token
+  botToken: ''
   authorizedChatId: ''
   polling: true
   debugAuth: false
 agent:
   default: antigravity
+workspaces:
+  - name: Projects
+    path: D:\Projects
+    agentType: antigravity
 screenshotPath: screenshots
 logLevel: info
 deployCommand: ''

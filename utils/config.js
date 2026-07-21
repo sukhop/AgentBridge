@@ -14,13 +14,16 @@ export async function loadConfig(rootDir) {
     }
   }
 
-  const telegramToken = fileConfig.telegram?.botToken || process.env.TELEGRAM_BOT_TOKEN || '';
-  const authorizedChatId = fileConfig.telegram?.authorizedChatId || process.env.AUTHORIZED_CHAT_ID || '';
-  const port = fileConfig.server?.port || Number(process.env.PORT) || 3030;
+  // Environment variables always take priority over config.yaml values.
+  // config.yaml is for non-secret settings; secrets live in .env.
+  const telegramToken = process.env.TELEGRAM_BOT_TOKEN || fileConfig.telegram?.botToken || '';
+  const authorizedChatId = process.env.AUTHORIZED_CHAT_ID || fileConfig.telegram?.authorizedChatId || '';
+  const port = Number(process.env.PORT) || fileConfig.server?.port || 3030;
 
   return {
     appName: 'AgentBridge',
     rootDir,
+    workspaces: fileConfig.workspaces || [],
     telegram: {
       botToken: telegramToken,
       authorizedChatId: String(authorizedChatId),

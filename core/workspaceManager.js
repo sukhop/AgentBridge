@@ -5,11 +5,16 @@ export class WorkspaceManager {
     this.workspaces = new Map(); // path -> workspace object
   }
 
-  async init() {
+  async init(configWorkspaces = []) {
     const state = this.storage.getState();
     if (state.workspaces) {
       for (const [path, ws] of Object.entries(state.workspaces)) {
         this.workspaces.set(path, ws);
+      }
+    }
+    if (this.workspaces.size === 0 && Array.isArray(configWorkspaces) && configWorkspaces.length > 0) {
+      for (const ws of configWorkspaces) {
+        await this.addWorkspace(ws.name, ws.path, ws.agentType);
       }
     }
   }

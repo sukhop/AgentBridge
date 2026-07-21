@@ -43,6 +43,7 @@ export class NotificationService extends EventEmitter {
         const approval = await this.adapter.detectApprovalRequest(session);
         this.logger.debug('NotificationService approval detection result', { id: session.id, required: approval?.required });
         if (approval?.required) {
+          console.log(`\n[DIAGNOSTICS] Adapter event received: Approval Required for ${session.projectName}`);
           const signature = `${approval.title}:${approval.command}`;
           if (signature !== this.lastApprovals.get(session.id)) {
             this.lastApprovals.set(session.id, signature);
@@ -51,7 +52,7 @@ export class NotificationService extends EventEmitter {
               approvalPending: true,
               currentTask: approval.command || approval.title
             });
-            this.logger.debug('NotificationService emitting approval required event', { id: session.id });
+            console.log(`[DIAGNOSTICS] Notification emitted: approval-required`);
             this.emit('notification', {
               type: 'approval-required',
               text: `⚠ ${session.projectName}\n\nApproval Required\n\nCommand:\n${approval.command || approval.title}`,
@@ -75,13 +76,13 @@ export class NotificationService extends EventEmitter {
         this.logger.debug('NotificationService retrieved session status', { id: session.id, lastState, newState: status.agentState });
 
         if (status.agentState && status.agentState !== lastState) {
-          this.logger.debug('NotificationService detected state change', { id: session.id, from: lastState, to: status.agentState });
+          console.log(`\n[DIAGNOSTICS] Adapter event received: State Change (${lastState} -> ${status.agentState}) for ${session.projectName}`);
           this.lastStates.set(session.id, status.agentState);
           await this.sessionManager.updateSessionState(session.id, { status: status.agentState });
 
           const text = getNotificationText(session.projectName, lastState, status.agentState);
           if (text) {
-            this.logger.debug('NotificationService emitting state change event', { id: session.id, type: status.agentState });
+            console.log(`[DIAGNOSTICS] Notification emitted: ${status.agentState.toLowerCase()}`);
             this.emit('notification', {
               type: status.agentState.toLowerCase(),
               text,

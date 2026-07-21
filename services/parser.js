@@ -18,7 +18,11 @@ const COMMANDS = new Set([
   'commit',
   'push',
   'deploy',
-  'branch'
+  'branch',
+  'sessions',
+  'projects',
+  'use',
+  'open'
 ]);
 
 export class Parser {

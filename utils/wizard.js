@@ -31,14 +31,21 @@ export async function runWizard(rootDir) {
 
     const config = {
       telegram: {
-        botToken: token,
-        authorizedChatId: '',
+        botToken: '',           // Set via TELEGRAM_BOT_TOKEN in .env
+        authorizedChatId: '',   // Set via AUTHORIZED_CHAT_ID in .env
         polling: true,
         debugAuth: false
       },
       agent: {
         default: defaultAgent.toLowerCase()
       },
+      workspaces: [
+        {
+          name: path.basename(projectPath) || 'DefaultProject',
+          path: projectPath,
+          agentType: defaultAgent.toLowerCase()
+        }
+      ],
       screenshotPath: 'screenshots',
       logLevel: 'info',
       deployCommand: '',
@@ -47,7 +54,7 @@ export async function runWizard(rootDir) {
         corsOrigin: '*'
       },
       monitor: {
-        intervalMs: 5000
+        intervalMs: notifications === 'yes' ? 5000 : 0
       },
       antigravity: {
         windowHint: 'Antigravity',
@@ -62,8 +69,23 @@ export async function runWizard(rootDir) {
     const configPath = path.join(rootDir, 'config.yaml');
     await fs.writeFile(configPath, dump(config, { indent: 2 }));
 
+    // Write secrets into .env so they are never committed to config.yaml
+    const envPath = path.join(rootDir, '.env');
+    let existingEnv = '';
+    try { existingEnv = await fs.readFile(envPath, 'utf8'); } catch { /* no .env yet */ }
+
+    const envLines = existingEnv.split('\n').filter(Boolean);
+    const setEnvVar = (lines, key, value) => {
+      const idx = lines.findIndex(l => l.startsWith(`${key}=`));
+      if (idx >= 0) lines[idx] = `${key}=${value}`;
+      else lines.push(`${key}=${value}`);
+    };
+    setEnvVar(envLines, 'TELEGRAM_BOT_TOKEN', token);
+    await fs.writeFile(envPath, envLines.join('\n') + '\n');
+
     console.log('\n======================================');
     console.log(`✅ Success! Configuration written to:\n${configPath}`);
+    console.log(`✅ Bot token written to:\n${envPath}`);
     console.log('Run the platform using:\n  agentbridge start');
     console.log('======================================\n');
     process.exit(0);

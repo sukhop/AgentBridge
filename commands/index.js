@@ -16,6 +16,7 @@ import { deployCommand } from './deploy.js';
 import { pushCommand } from './push.js';
 import { sessionsCommand } from './sessions.js';
 import { openCommand } from './open.js';
+import { useCommand } from './use.js';
 
 export function registerCommands(router) {
   router.register('start', helpCommand);
@@ -40,6 +41,7 @@ export function registerCommands(router) {
   router.register('deploy', deployCommand);
   router.register('sessions', sessionsCommand);
   router.register('projects', sessionsCommand);
+  router.register('use', useCommand);
   router.register('open', openCommand);
 }
 

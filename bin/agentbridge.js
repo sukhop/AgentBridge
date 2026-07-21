@@ -2,8 +2,7 @@
 
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import dotenv from 'dotenv';
-dotenv.config();
+import 'dotenv/config';
 
 import { runWizard } from '../utils/wizard.js';
 import { loadConfig } from '../utils/config.js';
@@ -50,7 +49,7 @@ const storage = new JsonStorage({ config, logger });
 await storage.init();
 
 const workspaceManager = new WorkspaceManager({ storage, logger });
-await workspaceManager.init();
+await workspaceManager.init(config.workspaces);
 
 const pluginLoader = new PluginLoader({ logger });
 await pluginLoader.loadPlugins(path.join(rootDir, 'plugins'));
@@ -327,3 +326,31 @@ process.on('SIGTERM', () => shutdown('SIGTERM'));
 await messenger.start();
 notificationService.start();
 logger.info('AgentBridge platform runner started');
+
+const hasToken = config.telegram.botToken ? 'yes' : 'no';
+const hasChatId = config.telegram.authorizedChatId ? 'yes' : 'no';
+const workspacesList = workspaceManager.listWorkspaces().map(w => `- ${w.name} (${w.path})`);
+const activeSession = sessionManager.getActiveSession();
+const activeSessionStr = activeSession ? `${activeSession.projectName} (ID: ${activeSession.id})` : 'none';
+const registeredSessionsList = sessionManager.getAllSessions().map(s => `- ${s.projectName} (ID: ${s.id}, State: ${s.status})`);
+const registeredCommandsList = Array.from(router.handlers.keys()).map(c => `/${c}`);
+
+console.log(`
+======================================
+     AgentBridge Startup Diagnostics  
+======================================
+Loaded bot token: ${hasToken}
+Loaded authorized chat id: ${hasChatId}
+
+Configured Workspaces:
+${workspacesList.length ? workspacesList.join('\n') : '  None'}
+
+Active Session:
+  ${activeSessionStr}
+
+Registered Sessions:
+${registeredSessionsList.length ? registeredSessionsList.join('\n') : '  None'}
+
+Registered Commands: [${registeredCommandsList.join(', ')}]
+======================================
+`);
