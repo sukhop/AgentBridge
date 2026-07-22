@@ -9,7 +9,10 @@ export async function openCommand({ command, sessionManager }) {
     if (!session) {
       return `Could not detect running Antigravity instance for project at "${projectPath}".`;
     }
-    return `Opened project and registered session:\n\n📂 Project: ${session.projectName}\n🟢 Status: ${session.status}`;
+    return {
+      text: `Opened project and registered session:\n\n📂 Project: ${session.projectName}\n🟢 Status: ${session.status}`,
+      sessionId: session.id
+    };
   } catch (error) {
     return `Failed to open project: ${error.message}`;
   }

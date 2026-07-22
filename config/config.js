@@ -46,7 +46,8 @@ export function loadConfig() {
       corsOrigin: env('CORS_ORIGIN', '*')
     },
     monitor: {
-      intervalMs: envNumber('MONITOR_INTERVAL_MS', 5000)
+      intervalMs: envNumber('MONITOR_INTERVAL_MS', 5000),
+      progressIntervalMs: envNumber('PROGRESS_INTERVAL_MS', 30000)
     },
     antigravity: {
       windowHint: env('ANTIGRAVITY_WINDOW_HINT', 'Antigravity'),

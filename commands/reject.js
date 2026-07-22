@@ -8,5 +8,5 @@ export async function rejectCommand({ controllers, sessionManager, command }) {
   const session = sessionManager.sessions.get(targetSessionId);
   if (!session) return `Session ${targetSessionId} not found.`;
   const result = await controllers.antigravity.reject(session.id);
-  return `Rejected ${session.projectName} (${result.strategy})`;
+  return { text: `Rejected ${session.projectName} (${result.strategy})`, sessionId: session.id };
 }

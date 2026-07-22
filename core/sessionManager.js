@@ -93,7 +93,7 @@ export class SessionManager {
       });
 
       if (!matchedWorkspace) {
-        const name = win.WindowTitle.split(' - ')[1] || win.ProcessName || 'AutoProject';
+        const name = win.WindowTitle.split(' - ')[0] || win.ProcessName || 'AutoProject';
         const projectPath = win.ExecutablePath ? path.dirname(win.ExecutablePath) : `C:\\Projects\\${name}`;
         matchedWorkspace = await this.workspaceManager.addWorkspace(name, projectPath, win.agentType);
       }
@@ -226,12 +226,22 @@ export class SessionManager {
       throw new Error(`Adapter ${type} does not support launching.`);
     }
 
-    await adapter.launch(projectPath);
+    const resolvedPath = projectPath.trim();
+
+    // Register the workspace up front using the exact path the caller gave us,
+    // so window-title matching in updateSessions() has a real name/path to
+    // match against instead of guessing one from the newly discovered window.
+    if (!this.workspaceManager.getWorkspace(resolvedPath)) {
+      const name = path.basename(resolvedPath) || 'Project';
+      await this.workspaceManager.addWorkspace(name, resolvedPath, type);
+    }
+
+    await adapter.launch(resolvedPath);
     await new Promise((resolve) => setTimeout(resolve, 3000));
     await this.updateSessions();
 
     const matching = Array.from(this.sessions.values()).find(
-      (s) => s.status !== 'Closed' && s.projectPath.toLowerCase() === projectPath.toLowerCase()
+      (s) => s.status !== 'Closed' && s.projectPath.toLowerCase() === resolvedPath.toLowerCase()
     );
     if (matching) {
       this.activeSessionId = matching.id;

@@ -150,7 +150,7 @@ AUTHORIZED_CHAT_ID=${chatId}
         await this.sessionManager.setActiveSession(sessionId);
         const name = this.sessionManager.getActiveSession()?.projectName || 'unknown';
         await this.bot.answerCallbackQuery(query.id, { text: `Activated project: ${name}` });
-        await this.sendResponse(chatId, { text: `🟢 Active project is now: ${name}` });
+        await this.sendResponse(chatId, { text: `🟢 Active project is now: ${name}`, sessionId });
       } catch (err) {
         await this.bot.answerCallbackQuery(query.id, { text: err.message });
       }
@@ -196,26 +196,8 @@ AUTHORIZED_CHAT_ID=${chatId}
 
     console.log(`[DIAGNOSTICS] Telegram sendMessage invoked for event type: ${event.type}`);
 
-    let p;
-    if (event.type === 'approval-required' && event.session) {
-      const keyboard = {
-        reply_markup: {
-          inline_keyboard: [
-            [
-              { text: 'Approve', callback_data: `approve:${event.session.id}` },
-              { text: 'Reject', callback_data: `reject:${event.session.id}` }
-            ],
-            [
-              { text: 'Screenshot', callback_data: `screenshot:${event.session.id}` },
-              { text: 'Status', callback_data: `status:${event.session.id}` }
-            ]
-          ]
-        }
-      };
-      p = this.bot.sendMessage(this.authorizedChatId, event.text, keyboard);
-    } else {
-      p = this.bot.sendMessage(this.authorizedChatId, event.text);
-    }
+    const keyboard = buildSessionKeyboard(event.session);
+    const p = this.bot.sendMessage(this.authorizedChatId, event.text, keyboard);
 
     try {
       const res = await p;
@@ -229,9 +211,13 @@ AUTHORIZED_CHAT_ID=${chatId}
   async sendResponse(chatId, response) {
     const text = response.text ?? 'Done.';
 
+    const contextSession = response.sessionId
+      ? this.sessionManager?.sessions.get(response.sessionId)
+      : this.sessionManager?.getActiveSession();
+
     const replyMarkup = response.reply_markup
       ? { reply_markup: response.reply_markup }
-      : mainKeyboardOptions();
+      : buildSessionKeyboard(contextSession);
 
     if (response.mediaPath) {
       await this.bot.sendPhoto(chatId, response.mediaPath, {
@@ -297,32 +283,39 @@ AUTHORIZED_CHAT_ID=${chatId}
   }
 }
 
-export function mainKeyboardOptions() {
-  return {
-    reply_markup: {
-      inline_keyboard: [
-        [
-          { text: 'Approve', callback_data: 'approve' },
-          { text: 'Reject', callback_data: 'reject' }
-        ],
-        [
-          { text: 'Screenshot', callback_data: 'screenshot' },
-          { text: 'Status', callback_data: 'status' }
-        ],
-        [
-          { text: 'Stop', callback_data: 'stop' },
-          { text: 'Resume', callback_data: 'resume' }
-        ],
-        [
-          { text: 'Projects', callback_data: 'sessions' }
-        ]
-      ]
-    }
-  };
-}
+// Builds a keyboard scoped to a single project session, so buttons on a
+// message always act on the project that message is about - not whichever
+// project happens to be "active" elsewhere. Approve/Reject only appear when
+// that specific project actually has a pending approval.
+export function buildSessionKeyboard(session) {
+  if (!session) {
+    return {
+      reply_markup: {
+        inline_keyboard: [[{ text: '📂 Projects', callback_data: 'sessions' }]]
+      }
+    };
+  }
 
-export function approvalKeyboardOptions() {
-  return mainKeyboardOptions();
+  const rows = [];
+  if (session.approvalPending) {
+    rows.push([
+      { text: 'Approve', callback_data: `approve:${session.id}` },
+      { text: 'Reject', callback_data: `reject:${session.id}` }
+    ]);
+  }
+  rows.push([
+    { text: 'Screenshot', callback_data: `screenshot:${session.id}` },
+    { text: 'Status', callback_data: `status:${session.id}` }
+  ]);
+  if (session.status !== 'Closed') {
+    rows.push([
+      { text: 'Stop', callback_data: `stop:${session.id}` },
+      { text: 'Resume', callback_data: `resume:${session.id}` }
+    ]);
+  }
+  rows.push([{ text: '📂 Projects', callback_data: 'sessions' }]);
+
+  return { reply_markup: { inline_keyboard: rows } };
 }
 
 function formatTelegramText(text) {

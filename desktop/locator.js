@@ -15,6 +15,13 @@ export class WindowLocator {
   }
 
   async getAllAntigravityWindows() {
+    if (process.platform === 'linux') {
+      return this.getAllAntigravityWindowsLinux();
+    }
+    return this.getAllAntigravityWindowsWindows();
+  }
+
+  async getAllAntigravityWindowsWindows() {
     const script = `
       Add-Type @"
       using System;
@@ -74,7 +81,48 @@ export class WindowLocator {
     }
   }
 
+  async getAllAntigravityWindowsLinux() {
+    const hint = this.windowHint.toLowerCase();
+    let stdout;
+    try {
+      ({ stdout } = await execFileAsync('wmctrl', ['-l', '-p'], { timeout: 5000 }));
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        this.logger.warn('wmctrl is not installed - window detection is disabled on Linux until you run: sudo apt install wmctrl');
+      } else {
+        this.logger.debug('Failed to get all Antigravity windows (Linux)', { message: error.message });
+      }
+      return [];
+    }
+
+    const results = [];
+    for (const rawLine of stdout.split('\n')) {
+      const line = rawLine.trim();
+      if (!line) continue;
+      const match = line.match(/^(\S+)\s+(-?\d+)\s+(\d+)\s+(\S+)\s+(.*)$/);
+      if (!match) continue;
+      const [, idHex, , pidStr, , title] = match;
+      if (!title.toLowerCase().includes(hint)) continue;
+      results.push({
+        PID: Number(pidStr),
+        WindowHandle: parseInt(idHex, 16),
+        WindowTitle: title,
+        ProcessName: 'antigravity',
+        ExecutablePath: '',
+        Bounds: null
+      });
+    }
+    return results;
+  }
+
   async getCurrentWindow() {
+    if (process.platform === 'linux') {
+      return this.getCurrentWindowLinux();
+    }
+    return this.getCurrentWindowWindows();
+  }
+
+  async getCurrentWindowWindows() {
     const script = `
       Add-Type @"
       using System;
@@ -98,5 +146,33 @@ export class WindowLocator {
       this.logger.debug('Current window lookup failed', { message: error.message });
       return null;
     }
+  }
+
+  async getCurrentWindowLinux() {
+    try {
+      const { stdout: activeOut } = await execFileAsync('xprop', ['-root', '-notype', '_NET_ACTIVE_WINDOW'], { timeout: 5000 });
+      const idMatch = activeOut.match(/#\s*(0x[0-9a-fA-F]+)/);
+      if (!idMatch) return null;
+      const idHex = idMatch[1];
+
+      const title = await this.readWindowTitleLinux(idHex);
+      return { handle: parseInt(idHex, 16), title };
+    } catch (error) {
+      this.logger.debug('Current window lookup failed (Linux)', { message: error.message });
+      return null;
+    }
+  }
+
+  async readWindowTitleLinux(idHex) {
+    for (const property of ['_NET_WM_NAME', 'WM_NAME']) {
+      try {
+        const { stdout } = await execFileAsync('xprop', ['-id', idHex, '-notype', property], { timeout: 5000 });
+        const match = stdout.match(/=\s*"(.*)"/);
+        if (match) return match[1];
+      } catch {
+        // Try the next property.
+      }
+    }
+    return '';
   }
 }

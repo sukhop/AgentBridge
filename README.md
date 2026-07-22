@@ -56,6 +56,7 @@ agentbridge/
    - Default AI Agent (e.g. `antigravity`)
    - Default project workspace path
    - Notification preferences
+   - **Phone pairing**: if you choose to pair now, the wizard waits for you to send any message to your bot in Telegram and automatically saves your chat ID to `.env` — no manual copy/paste or restart required.
 
 3. **Start the Platform**:
    ```bash
@@ -77,6 +78,11 @@ agentbridge/
 - `/history`: Copy and retrieve conversation log history.
 - `/deploy`: Run the configured project deploy script.
 - `/branch`: Show git branch information for the project.
+- `/stop [project]`, `/resume [project]`, `/restart [project]`: Control a specific project by name, without needing to switch it to "active" first.
+
+Every reply and notification is scoped to the project it's about: its inline buttons (Screenshot, Status, Stop, Resume) always act on that project's session, never on whichever project happens to be active elsewhere. Approve/Reject only appear when that specific project has a real pending approval — they're hidden otherwise, so you won't see stale action buttons when nothing needs a decision.
+
+While a project is actively running a prompt, you also get periodic "still working" pushes (current file, elapsed time, and the task in progress) instead of silence between the start and completion notifications — fired whenever the current file changes or every `PROGRESS_INTERVAL_MS` (default 30s), whichever comes first.
 
 ---
 

@@ -16,6 +16,7 @@ export async function screenshotCommand({ controllers, sessionManager, command }
   const mediaPath = await controllers.screenshot.capture(session);
   return {
     text: `Screenshot captured for ${session.projectName}`,
-    mediaPath
+    mediaPath,
+    sessionId: session.id
   };
 }

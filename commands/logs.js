@@ -13,9 +13,10 @@ export async function logsCommand({ storage, sessionManager }) {
     return {
       text: `${projectPrefix}Latest logs attached.`,
       fileName: 'agremote-logs.txt',
-      fileText: output
+      fileText: output,
+      sessionId: session?.id
     };
   }
 
-  return `${projectPrefix}Latest logs:\n\n${output}`;
+  return { text: `${projectPrefix}Latest logs:\n\n${output}`, sessionId: session?.id };
 }

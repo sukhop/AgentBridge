@@ -13,5 +13,5 @@ export async function useCommand({ sessionManager, command }) {
   }
 
   await sessionManager.setActiveSession(found.id);
-  return `🟢 Active project is now: ${found.projectName}`;
+  return { text: `🟢 Active project is now: ${found.projectName}`, sessionId: found.id };
 }

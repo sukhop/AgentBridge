@@ -8,5 +8,5 @@ export async function approveCommand({ controllers, sessionManager, command }) {
   const session = sessionManager.sessions.get(targetSessionId);
   if (!session) return `Session ${targetSessionId} not found.`;
   const result = await controllers.antigravity.approve(session.id);
-  return `Approved ${session.projectName} (${result.strategy})`;
+  return { text: `Approved ${session.projectName} (${result.strategy})`, sessionId: session.id };
 }

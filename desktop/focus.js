@@ -16,6 +16,13 @@ export class FocusManager {
       throw new Error('No window handle provided to focus.');
     }
 
+    if (process.platform === 'linux') {
+      return this.focusAntigravityLinux(handle);
+    }
+    return this.focusAntigravityWindows(handle);
+  }
+
+  async focusAntigravityWindows(handle) {
     const script = `
       Add-Type @"
       using System;
@@ -31,6 +38,18 @@ export class FocusManager {
     `;
 
     await execFileAsync('powershell.exe', ['-NoProfile', '-Command', script], { timeout: 5000 });
+  }
+
+  async focusAntigravityLinux(handle) {
+    const idHex = `0x${handle.toString(16)}`;
+    try {
+      await execFileAsync('wmctrl', ['-i', '-a', idHex], { timeout: 5000 });
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        throw new Error('wmctrl is not installed. Run: sudo apt install wmctrl');
+      }
+      throw error;
+    }
   }
 
   async verifyFocus(windowHandle, retries = 5, delayMs = 600) {

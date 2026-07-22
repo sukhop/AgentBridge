@@ -1,15 +1,20 @@
 import { EventEmitter } from 'node:events';
+import { extractLastTask } from '../utils/conversation.js';
 
 export class NotificationService extends EventEmitter {
-  constructor({ adapter, sessionManager, logger, intervalMs }) {
+  constructor({ adapter, sessionManager, logger, intervalMs, progressIntervalMs }) {
     super();
     this.adapter = adapter;
     this.sessionManager = sessionManager;
     this.logger = logger;
     this.intervalMs = intervalMs;
+    this.progressIntervalMs = progressIntervalMs || 30000;
     this.timer = null;
     this.lastApprovals = new Map(); // id -> signature
     this.lastStates = new Map();    // id -> state
+    this.runningSince = new Map();  // id -> timestamp the current run started
+    this.lastProgressAt = new Map(); // id -> timestamp of last progress push
+    this.lastProgressTitle = new Map(); // id -> windowTitle at last progress push
   }
 
   start() {
@@ -80,6 +85,14 @@ export class NotificationService extends EventEmitter {
           this.lastStates.set(session.id, status.agentState);
           await this.sessionManager.updateSessionState(session.id, { status: status.agentState });
 
+          if (status.agentState === 'Running') {
+            this.runningSince.set(session.id, Date.now());
+            this.lastProgressAt.delete(session.id);
+            this.lastProgressTitle.delete(session.id);
+          } else {
+            this.runningSince.delete(session.id);
+          }
+
           const text = getNotificationText(session.projectName, lastState, status.agentState);
           if (text) {
             console.log(`[DIAGNOSTICS] Notification emitted: ${status.agentState.toLowerCase()}`);
@@ -91,11 +104,68 @@ export class NotificationService extends EventEmitter {
             });
           }
         }
+
+        if (status.agentState === 'Running') {
+          await this.maybeEmitProgress(session);
+        }
       } catch (error) {
         this.logger.warn('Error checking session status', { sessionId: session.id, error: error.message });
       }
     }
   }
+
+  // Pushes a live "still working" update while a session stays in the
+  // Running state, instead of leaving the user with only a start/complete
+  // notification and no visibility in between. Fires whenever the window
+  // title changes (a new file/step) or the progress interval elapses,
+  // whichever comes first - so it reflects real progress, not just a timer.
+  // Each firing re-reads the actual conversation panel so the text reflects
+  // what the agent is doing *right now*, not a frozen echo of the first prompt.
+  async maybeEmitProgress(session) {
+    const now = Date.now();
+    const lastAt = this.lastProgressAt.get(session.id) || this.runningSince.get(session.id) || now;
+    const titleChanged = this.lastProgressTitle.get(session.id) !== session.windowTitle;
+
+    if (!titleChanged && now - lastAt < this.progressIntervalMs) return;
+
+    this.lastProgressAt.set(session.id, now);
+    this.lastProgressTitle.set(session.id, session.windowTitle);
+
+    const startedAt = this.runningSince.get(session.id) || now;
+    const elapsed = formatElapsed(now - startedAt);
+    const currentFile = (session.windowTitle || '').split(' - ')[0] || 'unknown';
+
+    let liveSnippet = null;
+    if (typeof this.adapter.copyConversation === 'function') {
+      try {
+        const history = await this.adapter.copyConversation(session);
+        liveSnippet = extractLastTask(history);
+      } catch (error) {
+        this.logger.debug('Live status snippet fetch failed', { sessionId: session.id, error: error.message });
+      }
+    }
+
+    const lines = [`⏳ ${session.projectName}`, '', `Still working (${elapsed})`, `Current file: ${currentFile}`];
+    if (liveSnippet) {
+      lines.push(`Latest: ${liveSnippet}`);
+    } else if (session.currentTask) {
+      lines.push(`Task: ${session.currentTask}`);
+    }
+
+    console.log(`[DIAGNOSTICS] Notification emitted: progress`);
+    this.emit('notification', {
+      type: 'progress',
+      text: lines.join('\n'),
+      session
+    });
+  }
+}
+
+function formatElapsed(ms) {
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
 }
 
 function getNotificationText(projectName, fromState, toState) {
