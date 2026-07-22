@@ -7,8 +7,9 @@ export async function terminalCommand({ controllers, sessionManager }) {
     return {
       text: `Terminal output for ${session.projectName} attached.`,
       fileName: 'terminal-output.txt',
-      fileText: output
+      fileText: output,
+      sessionId: session.id
     };
   }
-  return `Terminal output for ${session.projectName}:\n\n${output}`;
+  return { text: `Terminal output for ${session.projectName}:\n\n${output}`, sessionId: session.id };
 }

@@ -1,0 +1,102 @@
+{
+  "startedAt": "2026-07-22T06:04:45.695Z",
+  "lastPrompt": "",
+  "currentTask": "",
+  "agentState": "starting",
+  "lastError": "",
+  "currentProject": "AgentBridge",
+  "activeFile": "",
+  "workspaces": {
+    "D:\\Projects": {
+      "name": "Projects",
+      "path": "D:\\Projects",
+      "agentType": "antigravity",
+      "startedAt": "2026-07-22T06:04:45.697Z"
+    },
+    "C:\\Projects\\Antigravity IDE": {
+      "name": "Antigravity IDE",
+      "path": "C:\\Projects\\Antigravity IDE",
+      "agentType": "antigravity",
+      "startedAt": "2026-07-22T09:39:59.012Z"
+    }
+  },
+  "sessions": {
+    "73400324": {
+      "id": "73400324",
+      "projectName": "Antigravity IDE",
+      "projectPath": "C:\\Projects\\Antigravity IDE",
+      "agentType": "antigravity",
+      "processId": 16194,
+      "windowHandle": 73400324,
+      "windowTitle": "art-marketplace-frontend - Antigravity IDE - articles.jsx",
+      "status": "Idle",
+      "lastActivity": "2026-07-22T09:40:05.005Z",
+      "lastPrompt": "",
+      "currentTask": "",
+      "approvalPending": false,
+      "activeFile": "",
+      "conversationHistory": [],
+      "promptHistory": [],
+      "taskHistory": [],
+      "errors": [],
+      "startedAt": "2026-07-22T09:39:59.011Z"
+    },
+    "73400361": {
+      "id": "73400361",
+      "projectName": "Antigravity IDE",
+      "projectPath": "C:\\Projects\\Antigravity IDE",
+      "agentType": "antigravity",
+      "processId": 16194,
+      "windowHandle": 73400361,
+      "windowTitle": "AgentBridge - Antigravity IDE - Mobile project and agent…",
+      "status": "Idle",
+      "lastActivity": "2026-07-22T09:40:05.007Z",
+      "lastPrompt": "",
+      "currentTask": "",
+      "approvalPending": false,
+      "activeFile": "",
+      "conversationHistory": [],
+      "promptHistory": [],
+      "taskHistory": [],
+      "errors": [],
+      "startedAt": "2026-07-22T09:39:59.012Z"
+    },
+    "73400408": {
+      "id": "73400408",
+      "projectName": "Antigravity IDE",
+      "projectPath": "C:\\Projects\\Antigravity IDE",
+      "agentType": "antigravity",
+      "processId": 16194,
+      "windowHandle": 73400408,
+      "windowTitle": "commiter - Antigravity IDE",
+      "status": "Idle",
+      "lastActivity": "2026-07-22T09:40:05.007Z",
+      "lastPrompt": "",
+      "currentTask": "",
+      "approvalPending": false,
+      "activeFile": "",
+      "conversationHistory": [],
+      "promptHistory": [],
+      "taskHistory": [],
+      "errors": [],
+      "startedAt": "2026-07-22T09:39:59.013Z"
+    },
+    "offline-projects": {
+      "id": "offline-projects",
+      "projectName": "Projects",
+      "projectPath": "D:\\Projects",
+      "agentType": "antigravity",
+      "status": "Closed",
+      "lastActivity": "2026-07-22T06:04:46.124Z",
+      "lastPrompt": "",
+      "currentTask": "",
+      "approvalPending": false,
+      "activeFile": "",
+      "conversationHistory": [],
+      "promptHistory": [],
+      "taskHistory": [],
+      "errors": []
+    }
+  },
+  "activeSessionId": "73400324"
+}

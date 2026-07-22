@@ -1,6 +1,14 @@
-export async function resumeCommand({ controllers, sessionManager }) {
-  const session = sessionManager.getActiveSession();
+export async function resumeCommand({ controllers, sessionManager, command }) {
+  let session = sessionManager.getActiveSession();
+  if (command.args?.trim()) {
+    const target = command.args.trim().toLowerCase();
+    const found = sessionManager.getAllSessions().find(
+      (s) => s.projectName.toLowerCase() === target || s.id === target
+    );
+    if (!found) return `Project "${command.args}" not found.`;
+    session = found;
+  }
   if (!session) return 'No active session.';
   await controllers.antigravity.resume(session.id);
-  return `Agent resumed for ${session.projectName}`;
+  return { text: `Agent resumed for ${session.projectName}`, sessionId: session.id };
 }

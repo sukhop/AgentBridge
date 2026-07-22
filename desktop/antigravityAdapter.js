@@ -41,8 +41,8 @@ export class AntigravityAdapter {
     return this.automation.typePrompt(session, text);
   }
 
-  async pressEnter() {
-    return this.automation.pressEnter();
+  async pressEnter(session) {
+    return this.automation.pressEnter(session);
   }
 
   async clickApprove(session) {

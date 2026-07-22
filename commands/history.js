@@ -7,8 +7,9 @@ export async function historyCommand({ controllers, sessionManager }) {
     return {
       text: `Conversation history for ${session.projectName} attached.`,
       fileName: 'conversation-history.txt',
-      fileText: history
+      fileText: history,
+      sessionId: session.id
     };
   }
-  return `Conversation history for ${session.projectName}:\n\n${history}`;
+  return { text: `Conversation history for ${session.projectName}:\n\n${history}`, sessionId: session.id };
 }

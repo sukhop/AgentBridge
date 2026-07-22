@@ -80,8 +80,10 @@ export class DesktopAutomation {
         const pasted = await readClipboard();
         if (pasted.trim() === text.trim()) {
           verified = true;
-          // De-select or press right arrow to clear selection
-          await this.hotkey('Escape');
+          // Clear the selection with Right instead of Escape - Escape blurs
+          // or dismisses the input entirely in many chat panels, which would
+          // leave the pasted text sitting unsent when Enter is pressed next.
+          await this.hotkey('Right');
           break;
         }
         this.logger.warn('Paste verification mismatch, retrying...', {
@@ -99,7 +101,10 @@ export class DesktopAutomation {
     }
   }
 
-  async pressEnter() {
+  async pressEnter(session) {
+    if (session) {
+      await this.focusAntigravity(session);
+    }
     const { keyboard, Key } = await this.loadNut();
     await keyboard.pressKey(Key.Enter);
     await keyboard.releaseKey(Key.Enter);

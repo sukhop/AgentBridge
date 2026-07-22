@@ -1,0 +1,75 @@
+
+> agremote@1.0.0 start
+> node bin/agentbridge.js start
+
+Starting AgentBridge...
+[32minfo[39m: Loaded adapter plugin {"name":"antigravity","path":"/home/ubuntu/Sukhbir Projects/practice/AgentBridge/plugins/adapters/antigravity.js","service":"agremote","timestamp":"2026-07-22T12:45:00.364Z"}
+[32minfo[39m: Loaded adapter plugin {"name":"claudecode","path":"/home/ubuntu/Sukhbir Projects/practice/AgentBridge/plugins/adapters/claudecode.js","service":"agremote","timestamp":"2026-07-22T12:45:00.367Z"}
+[32minfo[39m: Loaded adapter plugin {"name":"codexcli","path":"/home/ubuntu/Sukhbir Projects/practice/AgentBridge/plugins/adapters/codexcli.js","service":"agremote","timestamp":"2026-07-22T12:45:00.368Z"}
+[32minfo[39m: Loaded adapter plugin {"name":"cursor","path":"/home/ubuntu/Sukhbir Projects/practice/AgentBridge/plugins/adapters/cursor.js","service":"agremote","timestamp":"2026-07-22T12:45:00.368Z"}
+[32minfo[39m: Loaded messenger plugin {"name":"telegram","path":"/home/ubuntu/Sukhbir Projects/practice/AgentBridge/plugins/messengers/telegram.js","service":"agremote","timestamp":"2026-07-22T12:45:00.511Z"}
+[32minfo[39m: SessionManager auto-update started {"service":"agremote","timestamp":"2026-07-22T12:45:00.527Z"}
+BOT TOKEN: 8985412926:AAEzwT4VnfdkOG7BdjUupZZQmAh_gEpOd-Q
+AUTHORIZED_CHAT_ID: 883230298
+[32minfo[39m: Telegram bot is ready {"polling":true,"service":"agremote","timestamp":"2026-07-22T12:45:01.637Z"}
+[32minfo[39m: Antigravity monitor started {"intervalMs":5000,"service":"agremote","timestamp":"2026-07-22T12:45:01.638Z"}
+[32minfo[39m: AgentBridge platform runner started {"service":"agremote","timestamp":"2026-07-22T12:45:01.638Z"}
+
+======================================
+     AgentBridge Startup Diagnostics  
+======================================
+Loaded bot token: yes
+Loaded authorized chat id: yes
+
+Configured Workspaces:
+- Projects (D:\Projects)
+- art-marketplace-frontend (C:\Projects\art-marketplace-frontend)
+- AgentBridge (C:\Projects\AgentBridge)
+- commiter (C:\Projects\commiter)
+- Antigravity (C:\Projects\Antigravity)
+
+Active Session:
+  AgentBridge (ID: 73400361)
+
+Registered Sessions:
+- art-marketplace-frontend (ID: 73400324, State: Idle)
+- AgentBridge (ID: 73400361, State: Running)
+- commiter (ID: 73400408, State: Closed)
+- Antigravity (ID: 92274692, State: Closed)
+- Antigravity (ID: 100663300, State: Closed)
+- Antigravity (ID: 100663303, State: Closed)
+- Antigravity (ID: 100663970, State: Closed)
+- Projects (ID: offline-projects, State: Closed)
+- Antigravity (ID: offline-antigravity, State: Closed)
+- commiter (ID: offline-commiter, State: Closed)
+
+Registered Commands: [/start, /approve, /reject, /help, /history, /logs, /prompt, /restart, /resume, /screenshot, /status, /stop, /terminal, /project, /file, /error, /branch, /commit, /push, /deploy, /sessions, /projects, /use, /open]
+======================================
+
+
+[DIAGNOSTICS] Adapter event received: State Change (undefined -> Idle) for art-marketplace-frontend
+
+[DIAGNOSTICS] Adapter event received: State Change (undefined -> Running) for AgentBridge
+[DIAGNOSTICS] Notification emitted: progress
+[DIAGNOSTICS] Telegram sendMessage invoked for event type: progress
+[DIAGNOSTICS] Telegram API response received: SUCCESS (Message ID: 180)
+
+[DIAGNOSTICS] Notification emitted: progress
+[DIAGNOSTICS] Telegram sendMessage invoked for event type: progress
+[DIAGNOSTICS] Telegram API response received: SUCCESS (Message ID: 181)
+
+
+--- Received update (Callback Button): "stop:73400361" from Chat 883230298 ---
+Parsed command: stop
+Selected handler: stopCommand
+Session ID: 73400361
+Workspace: AgentBridge
+[32minfo[39m: Command completed {"command":"stop","executionTimeMs":652,"sender":"883230298","service":"agremote","timestamp":"2026-07-22T12:45:45.442Z"}
+Telegram response sent
+
+
+[DIAGNOSTICS] Adapter event received: State Change (Running -> Stopped) for AgentBridge
+[DIAGNOSTICS] Notification emitted: stopped
+[DIAGNOSTICS] Telegram sendMessage invoked for event type: stopped
+[DIAGNOSTICS] Telegram API response received: SUCCESS (Message ID: 183)
+

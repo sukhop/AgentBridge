@@ -12,7 +12,7 @@ export class BaseAdapter {
     throw new Error('Not implemented');
   }
 
-  async pressEnter() {
+  async pressEnter(session) {
     throw new Error('Not implemented');
   }
 

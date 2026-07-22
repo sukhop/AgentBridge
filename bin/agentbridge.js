@@ -178,7 +178,7 @@ const controllers = {
       if (!s) throw new Error('No target session.');
       const adapter = sessionManager.getAdapterInstance(s.agentType);
       await adapter.typePrompt(s, msg);
-      await adapter.pressEnter();
+      await adapter.pressEnter(s);
       await sessionManager.updateSessionState(s.id, {
         lastPrompt: msg,
         currentTask: msg,
@@ -258,7 +258,7 @@ const controllers = {
       if (s.lastPrompt) {
         const adapter = sessionManager.getAdapterInstance(s.agentType);
         await adapter.typePrompt(s, s.lastPrompt);
-        await adapter.pressEnter();
+        await adapter.pressEnter(s);
         await sessionManager.updateSessionState(s.id, { status: 'Running' });
         return { restarted: true, replayedPrompt: true };
       }
@@ -281,6 +281,10 @@ const dynamicAdapterProxy = {
   getStatus: async (session) => {
     const adapter = sessionManager.getAdapterInstance(session.agentType);
     return adapter.getStatus(session);
+  },
+  copyConversation: async (session) => {
+    const adapter = sessionManager.getAdapterInstance(session.agentType);
+    return adapter.copyConversation(session);
   }
 };
 
@@ -288,7 +292,8 @@ const notificationService = new NotificationService({
   adapter: dynamicAdapterProxy,
   sessionManager,
   logger,
-  intervalMs: config.monitor.intervalMs
+  intervalMs: config.monitor.intervalMs,
+  progressIntervalMs: config.monitor.progressIntervalMs
 });
 
 // Resolve preferred messenger
