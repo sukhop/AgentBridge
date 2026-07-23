@@ -1,10 +1,11 @@
 export class CommandRouter {
-  constructor({ parser, controllers, storage, sessionManager, logger }) {
+  constructor({ parser, controllers, storage, sessionManager, logger, config }) {
     this.parser = parser;
     this.controllers = controllers;
     this.storage = storage;
     this.sessionManager = sessionManager;
     this.logger = logger;
+    this.config = config;
     this.handlers = new Map();
   }
 
@@ -33,7 +34,8 @@ export class CommandRouter {
         controllers: this.controllers,
         storage: this.storage,
         sessionManager: this.sessionManager,
-        logger: this.logger
+        logger: this.logger,
+        config: this.config
       });
       const executionTimeMs = Date.now() - startedAt;
       await this.storage.logEvent({

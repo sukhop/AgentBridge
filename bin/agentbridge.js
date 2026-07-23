@@ -11,6 +11,7 @@ import { JsonStorage } from '../storage/jsonStorage.js';
 import { WorkspaceManager } from '../core/workspaceManager.js';
 import { SessionManager } from '../core/sessionManager.js';
 import { PluginLoader } from '../core/pluginLoader.js';
+import { EventBus, EVENT_TYPES } from '../core/eventBus.js';
 import { CommandRouter } from '../services/commandRouter.js';
 import { Parser } from '../services/parser.js';
 import { NotificationService } from '../services/notificationService.js';
@@ -44,6 +45,7 @@ AgentBridge CLI Help:
 console.log('Starting AgentBridge...');
 const config = await loadConfig(rootDir);
 const logger = createLogger(config);
+const eventBus = new EventBus({ logger });
 
 const storage = new JsonStorage({ config, logger });
 await storage.init();
@@ -157,16 +159,23 @@ class DynamicGitController {
     const s = session || this.sessionManager.getActiveSession();
     return this.impl.deploy(s);
   }
+  async diff(session) {
+    const s = session || this.sessionManager.getActiveSession();
+    return this.impl.diff(s);
+  }
 }
 
 class DynamicScreenshotController {
-  constructor({ sessionManager, adapter, config, logger }) {
+  constructor({ sessionManager, adapter, config, logger, eventBus }) {
     this.sessionManager = sessionManager;
+    this.eventBus = eventBus;
     this.impl = new ScreenshotController({ adapter, config, logger });
   }
   async capture(session) {
     const s = session || this.sessionManager.getActiveSession();
-    return this.impl.capture(s);
+    const mediaPath = await this.impl.capture(s);
+    this.eventBus?.publish(EVENT_TYPES.SCREENSHOT_AVAILABLE, { session: s, mediaPath });
+    return mediaPath;
   }
 }
 
@@ -192,6 +201,7 @@ const controllers = {
       const adapter = sessionManager.getAdapterInstance(s.agentType);
       const res = await adapter.clickApprove(s);
       await sessionManager.updateSessionState(s.id, { status: 'Running', approvalPending: false });
+      eventBus.publish(EVENT_TYPES.APPROVAL_GRANTED, { session: s });
       return res;
     },
     reject: async (id) => {
@@ -200,6 +210,7 @@ const controllers = {
       const adapter = sessionManager.getAdapterInstance(s.agentType);
       const res = await adapter.clickReject(s);
       await sessionManager.updateSessionState(s.id, { status: 'Rejected' });
+      eventBus.publish(EVENT_TYPES.APPROVAL_REJECTED, { session: s });
       return res;
     },
     getStatus: async (id) => {
@@ -266,10 +277,10 @@ const controllers = {
     }
   },
   git: new DynamicGitController({ sessionManager, config, logger }),
-  screenshot: new DynamicScreenshotController({ sessionManager, adapter: activeAdapterProxy, config, logger })
+  screenshot: new DynamicScreenshotController({ sessionManager, adapter: activeAdapterProxy, config, logger, eventBus })
 };
 
-const router = new CommandRouter({ parser, controllers, storage, sessionManager, logger });
+const router = new CommandRouter({ parser, controllers, storage, sessionManager, logger, config });
 registerCommands(router);
 
 // Map dynamic adapter checks to notifications
@@ -281,10 +292,6 @@ const dynamicAdapterProxy = {
   getStatus: async (session) => {
     const adapter = sessionManager.getAdapterInstance(session.agentType);
     return adapter.getStatus(session);
-  },
-  copyConversation: async (session) => {
-    const adapter = sessionManager.getAdapterInstance(session.agentType);
-    return adapter.copyConversation(session);
   }
 };
 
@@ -292,48 +299,87 @@ const notificationService = new NotificationService({
   adapter: dynamicAdapterProxy,
   sessionManager,
   logger,
+  eventBus,
   intervalMs: config.monitor.intervalMs,
   progressIntervalMs: config.monitor.progressIntervalMs
 });
 
-// Resolve preferred messenger
-const messengerName = config.messenger || 'telegram';
-const MessengerClass = pluginLoader.messengers.get(messengerName.toLowerCase());
+// Instantiate every messenger enabled in config.messengers.* - any number
+// can run at once. NotificationService broadcasts to all of them; a
+// messenger that fails to connect (e.g. missing Discord token) is logged
+// and skipped rather than taking the whole platform down.
+const activeMessengers = [];
 
-if (!MessengerClass) {
-  throw new Error(`Messenger plugin "${messengerName}" was not loaded.`);
+for (const [name, messengerConfig] of Object.entries(config.messengers || {})) {
+  if (!messengerConfig.enabled) {
+    logger.info(`Messenger "${name}" is disabled, skipping.`, { name });
+    continue;
+  }
+
+  const MessengerClass = pluginLoader.messengers.get(name.toLowerCase());
+  if (!MessengerClass) {
+    logger.warn(`Messenger "${name}" is enabled but no matching plugin was loaded.`, { name });
+    continue;
+  }
+
+  const messenger = new MessengerClass({
+    config,
+    logger,
+    authService,
+    router,
+    sessionManager,
+    notificationService,
+    eventBus,
+    storage
+  });
+
+  try {
+    await messenger.connect();
+    activeMessengers.push({ name, messenger });
+    logger.info(`Messenger "${name}" connected.`, { name });
+  } catch (error) {
+    logger.error(`Messenger "${name}" failed to connect - continuing without it.`, {
+      name,
+      error: error.message
+    });
+  }
 }
 
-const messenger = new MessengerClass({
-  config,
-  logger,
-  authService,
-  router,
-  sessionManager,
-  notificationService
-});
+if (!activeMessengers.length) {
+  throw new Error('No messengers connected. Enable at least one in config.yaml/.env (see messengers.telegram / messengers.discord).');
+}
 
 notificationService.on('notification', async (event) => {
-  await messenger.sendNotification(event);
+  for (const { name, messenger } of activeMessengers) {
+    try {
+      await messenger.notify(event);
+    } catch (error) {
+      logger.warn(`Messenger "${name}" failed to deliver a notification.`, { name, error: error.message });
+    }
+  }
 });
 
 async function shutdown(signal) {
   logger.info(`Received ${signal}; shutting down`);
   notificationService.stop();
   sessionManager.stop();
-  await messenger.stop();
+  for (const { name, messenger } of activeMessengers) {
+    try {
+      await messenger.disconnect();
+    } catch (error) {
+      logger.warn(`Messenger "${name}" failed to disconnect cleanly.`, { name, error: error.message });
+    }
+  }
   process.exit(0);
 }
 
 process.on('SIGINT', () => shutdown('SIGINT'));
 process.on('SIGTERM', () => shutdown('SIGTERM'));
 
-await messenger.start();
 notificationService.start();
 logger.info('AgentBridge platform runner started');
 
-const hasToken = config.telegram.botToken ? 'yes' : 'no';
-const hasChatId = config.telegram.authorizedChatId ? 'yes' : 'no';
+const connectedMessengersList = activeMessengers.map(({ name }) => `- ${name}`);
 const workspacesList = workspaceManager.listWorkspaces().map(w => `- ${w.name} (${w.path})`);
 const activeSession = sessionManager.getActiveSession();
 const activeSessionStr = activeSession ? `${activeSession.projectName} (ID: ${activeSession.id})` : 'none';
@@ -342,10 +388,10 @@ const registeredCommandsList = Array.from(router.handlers.keys()).map(c => `/${c
 
 console.log(`
 ======================================
-     AgentBridge Startup Diagnostics  
+     AgentBridge Startup Diagnostics
 ======================================
-Loaded bot token: ${hasToken}
-Loaded authorized chat id: ${hasChatId}
+Connected Messengers:
+${connectedMessengersList.length ? connectedMessengersList.join('\n') : '  None'}
 
 Configured Workspaces:
 ${workspacesList.length ? workspacesList.join('\n') : '  None'}

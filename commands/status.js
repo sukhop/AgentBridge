@@ -1,5 +1,3 @@
-import { extractLastTask } from '../utils/conversation.js';
-
 export async function statusCommand({ controllers, sessionManager, command }) {
   let session = sessionManager.getActiveSession();
   if (command.args?.trim()) {
@@ -18,20 +16,12 @@ export async function statusCommand({ controllers, sessionManager, command }) {
   const status = await controllers.antigravity.getStatus(session.id);
   const branch = await controllers.git.branch(session).then((b) => b.current).catch(() => 'unknown');
 
-  let currentTask = status.currentTask;
-  let taskSource = '';
-  if (!currentTask) {
-    // AgentBridge only tracks tasks it sent itself via /prompt. If nothing
-    // is tracked, read the real conversation panel so a task started
-    // directly on the desktop still shows up here.
-    try {
-      const history = await controllers.antigravity.getConversationHistory(session.id);
-      currentTask = extractLastTask(history);
-      if (currentTask) taskSource = ' (from conversation)';
-    } catch {
-      // Leave currentTask unset - fall through to "none" below.
-    }
-  }
+  // Reading the live conversation panel here has been disabled: the
+  // Control+Shift+C -> Control+A -> Control+C hotkey sequence it relies on
+  // has twice left a key stuck "held down" on the real desktop, typing
+  // garbage into whatever was focused. Re-enable only after that's fixed.
+  const currentTask = status.currentTask;
+  const taskSource = '';
 
   return {
     text: [

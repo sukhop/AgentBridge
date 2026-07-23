@@ -49,6 +49,19 @@ export class GitController {
     return this.git(cwd, ['push']);
   }
 
+  async diff(session) {
+    const cwd = session?.projectPath || this.defaultCwd;
+    const [unstaged, staged] = await Promise.all([
+      this.git(cwd, ['diff']),
+      this.git(cwd, ['diff', '--cached'])
+    ]);
+    const combined = [
+      staged.trim() ? `# Staged changes\n${staged.trim()}` : '',
+      unstaged.trim() ? `# Unstaged changes\n${unstaged.trim()}` : ''
+    ].filter(Boolean).join('\n\n');
+    return combined || null;
+  }
+
   async deploy(session) {
     const cwd = session?.projectPath || this.defaultCwd;
     if (!this.config.deployCommand) {

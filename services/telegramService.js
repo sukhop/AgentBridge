@@ -9,7 +9,8 @@ const CALLBACK_COMMANDS = new Map([
   ['status', '/status'],
   ['stop', '/stop'],
   ['resume', '/resume'],
-  ['sessions', '/sessions']
+  ['sessions', '/sessions'],
+  ['diff', '/diff']
 ]);
 
 export class TelegramService {
@@ -278,7 +279,9 @@ AUTHORIZED_CHAT_ID=${chatId}
       { command: 'sessions', description: 'List active project sessions' },
       { command: 'projects', description: 'List registered workspaces and status' },
       { command: 'use', description: 'Switch active workspace project' },
-      { command: 'open', description: 'Open and register a project' }
+      { command: 'open', description: 'Open and register a project' },
+      { command: 'diff', description: 'Show git diff for a project' },
+      { command: 'settings', description: 'Show AgentBridge settings' }
     ]);
   }
 }
@@ -302,6 +305,7 @@ export function buildSessionKeyboard(session) {
       { text: 'Approve', callback_data: `approve:${session.id}` },
       { text: 'Reject', callback_data: `reject:${session.id}` }
     ]);
+    rows.push([{ text: 'View Diff', callback_data: `diff:${session.id}` }]);
   }
   rows.push([
     { text: 'Screenshot', callback_data: `screenshot:${session.id}` },
@@ -318,7 +322,7 @@ export function buildSessionKeyboard(session) {
   return { reply_markup: { inline_keyboard: rows } };
 }
 
-function formatTelegramText(text) {
+export function formatTelegramText(text) {
   if (text.length > 3900) {
     return escapeHtml(`${text.slice(0, 3900)}\n\n[truncated]`);
   }
