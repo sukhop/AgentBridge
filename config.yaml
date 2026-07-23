@@ -3,6 +3,14 @@ telegram:
   authorizedChatId: ''
   polling: true
   debugAuth: false
+# Non-secret enable/disable toggles for each messenger. Tokens/ids are
+# secrets and only ever come from .env (TELEGRAM_BOT_TOKEN,
+# AUTHORIZED_CHAT_ID, DISCORD_BOT_TOKEN, DISCORD_GUILD_ID, DISCORD_CHANNEL_ID).
+messengers:
+  telegram:
+    enabled: true
+  discord:
+    enabled: false
 agent:
   default: antigravity
 workspaces:
@@ -17,6 +25,7 @@ server:
   corsOrigin: '*'
 monitor:
   intervalMs: 5000
+  progressIntervalMs: 30000
 antigravity:
   windowHint: Antigravity
   cdpUrl: ''

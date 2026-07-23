@@ -22,7 +22,9 @@ const COMMANDS = new Set([
   'sessions',
   'projects',
   'use',
-  'open'
+  'open',
+  'settings',
+  'diff'
 ]);
 
 export class Parser {

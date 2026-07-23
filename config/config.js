@@ -38,6 +38,19 @@ export function loadConfig() {
       polling: envBoolean('TELEGRAM_POLLING', true),
       debugAuth: envBoolean('DEBUG_AUTH', false)
     },
+    messengers: {
+      telegram: {
+        enabled: envBoolean('MESSENGER_TELEGRAM_ENABLED', true),
+        botToken: env('TELEGRAM_BOT_TOKEN'),
+        chatId: env('AUTHORIZED_CHAT_ID')
+      },
+      discord: {
+        enabled: envBoolean('MESSENGER_DISCORD_ENABLED', false),
+        botToken: env('DISCORD_BOT_TOKEN'),
+        guildId: env('DISCORD_GUILD_ID'),
+        channelId: env('DISCORD_CHANNEL_ID')
+      }
+    },
     screenshotPath,
     logLevel: env('LOG_LEVEL', 'info'),
     deployCommand: env('DEPLOY_COMMAND', ''),

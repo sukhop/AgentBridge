@@ -3,23 +3,30 @@
 > node bin/agentbridge.js start
 
 Starting AgentBridge...
-[32minfo[39m: Loaded adapter plugin {"name":"antigravity","path":"/home/ubuntu/Sukhbir Projects/practice/AgentBridge/plugins/adapters/antigravity.js","service":"agremote","timestamp":"2026-07-22T12:45:00.364Z"}
-[32minfo[39m: Loaded adapter plugin {"name":"claudecode","path":"/home/ubuntu/Sukhbir Projects/practice/AgentBridge/plugins/adapters/claudecode.js","service":"agremote","timestamp":"2026-07-22T12:45:00.367Z"}
-[32minfo[39m: Loaded adapter plugin {"name":"codexcli","path":"/home/ubuntu/Sukhbir Projects/practice/AgentBridge/plugins/adapters/codexcli.js","service":"agremote","timestamp":"2026-07-22T12:45:00.368Z"}
-[32minfo[39m: Loaded adapter plugin {"name":"cursor","path":"/home/ubuntu/Sukhbir Projects/practice/AgentBridge/plugins/adapters/cursor.js","service":"agremote","timestamp":"2026-07-22T12:45:00.368Z"}
-[32minfo[39m: Loaded messenger plugin {"name":"telegram","path":"/home/ubuntu/Sukhbir Projects/practice/AgentBridge/plugins/messengers/telegram.js","service":"agremote","timestamp":"2026-07-22T12:45:00.511Z"}
-[32minfo[39m: SessionManager auto-update started {"service":"agremote","timestamp":"2026-07-22T12:45:00.527Z"}
+[32minfo[39m: Loaded adapter plugin {"name":"antigravity","path":"/home/ubuntu/Sukhbir Projects/practice/AgentBridge/plugins/adapters/antigravity.js","service":"agremote","timestamp":"2026-07-23T07:05:07.393Z"}
+[32minfo[39m: Loaded adapter plugin {"name":"claudecode","path":"/home/ubuntu/Sukhbir Projects/practice/AgentBridge/plugins/adapters/claudecode.js","service":"agremote","timestamp":"2026-07-23T07:05:07.396Z"}
+[32minfo[39m: Loaded adapter plugin {"name":"codexcli","path":"/home/ubuntu/Sukhbir Projects/practice/AgentBridge/plugins/adapters/codexcli.js","service":"agremote","timestamp":"2026-07-23T07:05:07.397Z"}
+[32minfo[39m: Loaded adapter plugin {"name":"cursor","path":"/home/ubuntu/Sukhbir Projects/practice/AgentBridge/plugins/adapters/cursor.js","service":"agremote","timestamp":"2026-07-23T07:05:07.398Z"}
+[32minfo[39m: Loaded messenger plugin {"name":"discord","path":"/home/ubuntu/Sukhbir Projects/practice/AgentBridge/plugins/messengers/discord.js","service":"agremote","timestamp":"2026-07-23T07:05:07.559Z"}
+[32minfo[39m: Loaded messenger plugin {"name":"telegram","path":"/home/ubuntu/Sukhbir Projects/practice/AgentBridge/plugins/messengers/telegram.js","service":"agremote","timestamp":"2026-07-23T07:05:07.688Z"}
+[32minfo[39m: Registered new agent session {"agentType":"antigravity","id":"75497508","project":"AgentBridge","service":"agremote","timestamp":"2026-07-23T07:05:07.709Z"}
+[32minfo[39m: Registered new agent session {"agentType":"antigravity","id":"75497514","project":"art-marketplace-frontend","service":"agremote","timestamp":"2026-07-23T07:05:07.710Z"}
+[32minfo[39m: Registered new agent session {"agentType":"antigravity","id":"75497550","project":"Antigravity","service":"agremote","timestamp":"2026-07-23T07:05:07.710Z"}
+[32minfo[39m: Auto-selected active session {"id":"75497508","project":"AgentBridge","service":"agremote","timestamp":"2026-07-23T07:05:07.710Z"}
+[32minfo[39m: SessionManager auto-update started {"service":"agremote","timestamp":"2026-07-23T07:05:07.711Z"}
 BOT TOKEN: 8985412926:AAEzwT4VnfdkOG7BdjUupZZQmAh_gEpOd-Q
 AUTHORIZED_CHAT_ID: 883230298
-[32minfo[39m: Telegram bot is ready {"polling":true,"service":"agremote","timestamp":"2026-07-22T12:45:01.637Z"}
-[32minfo[39m: Antigravity monitor started {"intervalMs":5000,"service":"agremote","timestamp":"2026-07-22T12:45:01.638Z"}
-[32minfo[39m: AgentBridge platform runner started {"service":"agremote","timestamp":"2026-07-22T12:45:01.638Z"}
+[32minfo[39m: Telegram bot is ready {"polling":true,"service":"agremote","timestamp":"2026-07-23T07:05:08.551Z"}
+[32minfo[39m: Messenger "telegram" connected. {"name":"telegram","service":"agremote","timestamp":"2026-07-23T07:05:08.551Z"}
+[32minfo[39m: Messenger "discord" is disabled, skipping. {"name":"discord","service":"agremote","timestamp":"2026-07-23T07:05:08.551Z"}
+[32minfo[39m: Antigravity monitor started {"intervalMs":5000,"service":"agremote","timestamp":"2026-07-23T07:05:08.551Z"}
+[32minfo[39m: AgentBridge platform runner started {"service":"agremote","timestamp":"2026-07-23T07:05:08.551Z"}
 
 ======================================
-     AgentBridge Startup Diagnostics  
+     AgentBridge Startup Diagnostics
 ======================================
-Loaded bot token: yes
-Loaded authorized chat id: yes
+Connected Messengers:
+- telegram
 
 Configured Workspaces:
 - Projects (D:\Projects)
@@ -29,47 +36,53 @@ Configured Workspaces:
 - Antigravity (C:\Projects\Antigravity)
 
 Active Session:
-  AgentBridge (ID: 73400361)
+  AgentBridge (ID: 75497508)
 
 Registered Sessions:
-- art-marketplace-frontend (ID: 73400324, State: Idle)
-- AgentBridge (ID: 73400361, State: Running)
+- art-marketplace-frontend (ID: 73400324, State: Closed)
+- AgentBridge (ID: 73400361, State: Closed)
 - commiter (ID: 73400408, State: Closed)
+- Antigravity (ID: 73400437, State: Closed)
 - Antigravity (ID: 92274692, State: Closed)
 - Antigravity (ID: 100663300, State: Closed)
 - Antigravity (ID: 100663303, State: Closed)
 - Antigravity (ID: 100663970, State: Closed)
 - Projects (ID: offline-projects, State: Closed)
-- Antigravity (ID: offline-antigravity, State: Closed)
 - commiter (ID: offline-commiter, State: Closed)
+- AgentBridge (ID: 75497508, State: Idle)
+- art-marketplace-frontend (ID: 75497514, State: Idle)
+- Antigravity (ID: 75497550, State: Idle)
 
-Registered Commands: [/start, /approve, /reject, /help, /history, /logs, /prompt, /restart, /resume, /screenshot, /status, /stop, /terminal, /project, /file, /error, /branch, /commit, /push, /deploy, /sessions, /projects, /use, /open]
+Registered Commands: [/start, /approve, /reject, /help, /history, /logs, /prompt, /restart, /resume, /screenshot, /status, /stop, /terminal, /project, /file, /error, /branch, /commit, /push, /deploy, /sessions, /projects, /use, /open, /settings, /diff]
 ======================================
 
 
+[DIAGNOSTICS] Adapter event received: State Change (undefined -> Idle) for AgentBridge
+
 [DIAGNOSTICS] Adapter event received: State Change (undefined -> Idle) for art-marketplace-frontend
 
-[DIAGNOSTICS] Adapter event received: State Change (undefined -> Running) for AgentBridge
-[DIAGNOSTICS] Notification emitted: progress
-[DIAGNOSTICS] Telegram sendMessage invoked for event type: progress
-[DIAGNOSTICS] Telegram API response received: SUCCESS (Message ID: 180)
-
-[DIAGNOSTICS] Notification emitted: progress
-[DIAGNOSTICS] Telegram sendMessage invoked for event type: progress
-[DIAGNOSTICS] Telegram API response received: SUCCESS (Message ID: 181)
-
-
---- Received update (Callback Button): "stop:73400361" from Chat 883230298 ---
-Parsed command: stop
-Selected handler: stopCommand
-Session ID: 73400361
-Workspace: AgentBridge
-[32minfo[39m: Command completed {"command":"stop","executionTimeMs":652,"sender":"883230298","service":"agremote","timestamp":"2026-07-22T12:45:45.442Z"}
-Telegram response sent
-
-
-[DIAGNOSTICS] Adapter event received: State Change (Running -> Stopped) for AgentBridge
-[DIAGNOSTICS] Notification emitted: stopped
-[DIAGNOSTICS] Telegram sendMessage invoked for event type: stopped
-[DIAGNOSTICS] Telegram API response received: SUCCESS (Message ID: 183)
-
+[DIAGNOSTICS] Adapter event received: State Change (undefined -> Idle) for Antigravity
+[32minfo[39m: Agent session closed {"id":"75497550","project":"Antigravity","service":"agremote","timestamp":"2026-07-23T07:14:33.072Z"}
+[31merror[39m: ETELEGRAM: 409 Conflict: terminated by other getUpdates request; make sure that only one bot instance is running {"code":"ETELEGRAM","service":"agremote","timestamp":"2026-07-23T07:16:47.516Z"}
+[31merror[39m: ETELEGRAM: 409 Conflict: terminated by other getUpdates request; make sure that only one bot instance is running {"code":"ETELEGRAM","service":"agremote","timestamp":"2026-07-23T07:16:55.237Z"}
+[31merror[39m: ETELEGRAM: 409 Conflict: terminated by other getUpdates request; make sure that only one bot instance is running {"code":"ETELEGRAM","service":"agremote","timestamp":"2026-07-23T07:52:47.891Z"}
+[31merror[39m: ETELEGRAM: 409 Conflict: terminated by other getUpdates request; make sure that only one bot instance is running {"code":"ETELEGRAM","service":"agremote","timestamp":"2026-07-23T07:52:55.782Z"}
+[31merror[39m: ETELEGRAM: 409 Conflict: terminated by other getUpdates request; make sure that only one bot instance is running {"code":"ETELEGRAM","service":"agremote","timestamp":"2026-07-23T07:53:03.651Z"}
+[31merror[39m: ETELEGRAM: 409 Conflict: terminated by other getUpdates request; make sure that only one bot instance is running {"code":"ETELEGRAM","service":"agremote","timestamp":"2026-07-23T07:53:11.660Z"}
+[31merror[39m: ETELEGRAM: 409 Conflict: terminated by other getUpdates request; make sure that only one bot instance is running {"code":"ETELEGRAM","service":"agremote","timestamp":"2026-07-23T07:53:19.545Z"}
+[31merror[39m: ETELEGRAM: 409 Conflict: terminated by other getUpdates request; make sure that only one bot instance is running {"code":"ETELEGRAM","service":"agremote","timestamp":"2026-07-23T07:53:27.438Z"}
+[31merror[39m: ETELEGRAM: 409 Conflict: terminated by other getUpdates request; make sure that only one bot instance is running {"code":"ETELEGRAM","service":"agremote","timestamp":"2026-07-23T07:53:35.315Z"}
+[31merror[39m: ETELEGRAM: 409 Conflict: terminated by other getUpdates request; make sure that only one bot instance is running {"code":"ETELEGRAM","service":"agremote","timestamp":"2026-07-23T07:53:43.208Z"}
+[31merror[39m: ETELEGRAM: 409 Conflict: terminated by other getUpdates request; make sure that only one bot instance is running {"code":"ETELEGRAM","service":"agremote","timestamp":"2026-07-23T07:53:51.090Z"}
+[31merror[39m: ETELEGRAM: 409 Conflict: terminated by other getUpdates request; make sure that only one bot instance is running {"code":"ETELEGRAM","service":"agremote","timestamp":"2026-07-23T07:53:58.977Z"}
+[31merror[39m: ETELEGRAM: 409 Conflict: terminated by other getUpdates request; make sure that only one bot instance is running {"code":"ETELEGRAM","service":"agremote","timestamp":"2026-07-23T07:54:06.861Z"}
+[31merror[39m: ETELEGRAM: 409 Conflict: terminated by other getUpdates request; make sure that only one bot instance is running {"code":"ETELEGRAM","service":"agremote","timestamp":"2026-07-23T07:54:14.742Z"}
+[31merror[39m: ETELEGRAM: 409 Conflict: terminated by other getUpdates request; make sure that only one bot instance is running {"code":"ETELEGRAM","service":"agremote","timestamp":"2026-07-23T07:54:22.624Z"}
+[31merror[39m: ETELEGRAM: 409 Conflict: terminated by other getUpdates request; make sure that only one bot instance is running {"code":"ETELEGRAM","service":"agremote","timestamp":"2026-07-23T07:54:30.516Z"}
+[31merror[39m: ETELEGRAM: 409 Conflict: terminated by other getUpdates request; make sure that only one bot instance is running {"code":"ETELEGRAM","service":"agremote","timestamp":"2026-07-23T07:54:38.398Z"}
+[31merror[39m: ETELEGRAM: 409 Conflict: terminated by other getUpdates request; make sure that only one bot instance is running {"code":"ETELEGRAM","service":"agremote","timestamp":"2026-07-23T07:54:46.278Z"}
+[31merror[39m: ETELEGRAM: 409 Conflict: terminated by other getUpdates request; make sure that only one bot instance is running {"code":"ETELEGRAM","service":"agremote","timestamp":"2026-07-23T07:54:54.161Z"}
+[31merror[39m: ETELEGRAM: 409 Conflict: terminated by other getUpdates request; make sure that only one bot instance is running {"code":"ETELEGRAM","service":"agremote","timestamp":"2026-07-23T07:55:02.043Z"}
+[31merror[39m: ETELEGRAM: 409 Conflict: terminated by other getUpdates request; make sure that only one bot instance is running {"code":"ETELEGRAM","service":"agremote","timestamp":"2026-07-23T07:55:09.926Z"}
+[31merror[39m: ETELEGRAM: 409 Conflict: terminated by other getUpdates request; make sure that only one bot instance is running {"code":"ETELEGRAM","service":"agremote","timestamp":"2026-07-23T07:55:17.819Z"}
+[31merror[39m: ETELEGRAM: 409 Conflict: terminated by other getUpdates request; make sure that only one bot instance is running {"code":"ETELEGRAM","service":"agremote","timestamp":"2026-07-23T07:55:25.714Z"}

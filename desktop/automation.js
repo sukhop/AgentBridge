@@ -24,6 +24,7 @@ export class DesktopAutomation {
     this.focusManager = focusManager;
     this.locator = locator;
     this.nut = null;
+    this.automationLock = Promise.resolve();
   }
 
   async loadNut() {
@@ -32,6 +33,16 @@ export class DesktopAutomation {
     this.nut.keyboard.config.autoDelayMs = 20;
     this.nut.mouse.config.autoDelayMs = 20;
     return this.nut;
+  }
+
+  // Serializes every top-level automation action (keyboard/mouse) so two
+  // sessions being checked around the same time can never interleave key
+  // presses - a real cause of keys getting stuck "held down" (auto-repeating)
+  // when one sequence's press/release overlapped with another's.
+  withLock(fn) {
+    const run = this.automationLock.then(fn, fn);
+    this.automationLock = run.then(() => {}, () => {});
+    return run;
   }
 
   async focusAntigravity(session) {
@@ -48,6 +59,10 @@ export class DesktopAutomation {
   }
 
   async typePrompt(session, text) {
+    return this.withLock(() => this.typePromptImpl(session, text));
+  }
+
+  async typePromptImpl(session, text) {
     await this.focusAntigravity(session);
     const promptBox = await this.findPromptBox(session);
 
@@ -102,12 +117,19 @@ export class DesktopAutomation {
   }
 
   async pressEnter(session) {
+    return this.withLock(() => this.pressEnterImpl(session));
+  }
+
+  async pressEnterImpl(session) {
     if (session) {
       await this.focusAntigravity(session);
     }
     const { keyboard, Key } = await this.loadNut();
-    await keyboard.pressKey(Key.Enter);
-    await keyboard.releaseKey(Key.Enter);
+    try {
+      await keyboard.pressKey(Key.Enter);
+    } finally {
+      await keyboard.releaseKey(Key.Enter);
+    }
   }
 
   async click(x, y) {
@@ -125,11 +147,21 @@ export class DesktopAutomation {
       throw new Error(`Unsupported shortcut: ${shortcut}`);
     }
 
-    await keyboard.pressKey(...resolved);
-    await keyboard.releaseKey(...resolved.reverse());
+    // Guarantee release even if press partially fails partway through a
+    // multi-key combo - otherwise a key can stay physically "held down"
+    // at the OS level and auto-repeat indefinitely.
+    try {
+      await keyboard.pressKey(...resolved);
+    } finally {
+      await keyboard.releaseKey(...resolved.reverse());
+    }
   }
 
   async clickApprove(session) {
+    return this.withLock(() => this.clickApproveImpl(session));
+  }
+
+  async clickApproveImpl(session) {
     await this.focusAntigravity(session);
     const point = this.config.antigravity.fallbackCoordinates.approveButton;
     if (point) {
@@ -137,11 +169,15 @@ export class DesktopAutomation {
       return { strategy: 'coordinate' };
     }
 
-    await this.pressEnter();
+    await this.pressEnterImpl();
     return { strategy: 'enter-key' };
   }
 
   async clickReject(session) {
+    return this.withLock(() => this.clickRejectImpl(session));
+  }
+
+  async clickRejectImpl(session) {
     await this.focusAntigravity(session);
     const point = this.config.antigravity.fallbackCoordinates.rejectButton;
     if (point) {
@@ -154,6 +190,10 @@ export class DesktopAutomation {
   }
 
   async captureWindow(session) {
+    return this.withLock(() => this.captureWindowImpl(session));
+  }
+
+  async captureWindowImpl(session) {
     await fs.mkdir(this.config.screenshotPath, { recursive: true });
     await this.focusAntigravity(session);
 
@@ -178,25 +218,16 @@ export class DesktopAutomation {
     return outputPath;
   }
 
+  // Disabled: this shortcut -> Select All -> Copy sequence has twice left a
+  // key stuck "held down" on the real desktop (auto-repeating into whatever
+  // window ended up focused, including live source files). Needs a safer
+  // implementation - e.g. CDP-based DOM reads instead of keyboard automation
+  // - before this can run again. See copyTerminal/copyConversation below.
   async copyTerminal(session) {
-    await this.focusAntigravity(session);
-    await this.hotkey(this.config.antigravity.terminalShortcut);
-    await new Promise((resolve) => setTimeout(resolve, 100));
-    await this.hotkey(process.platform === 'darwin' ? 'Meta+A' : 'Control+A');
-    await new Promise((resolve) => setTimeout(resolve, 100));
-    await this.hotkey(process.platform === 'darwin' ? 'Meta+C' : 'Control+C');
-    await new Promise((resolve) => setTimeout(resolve, 100));
-    return readClipboard();
+    throw new Error('/terminal is temporarily disabled - the copy automation it relies on was causing stuck-key issues on the desktop.');
   }
 
   async copyConversation(session) {
-    await this.focusAntigravity(session);
-    await this.hotkey(this.config.antigravity.conversationShortcut);
-    await new Promise((resolve) => setTimeout(resolve, 100));
-    await this.hotkey(process.platform === 'darwin' ? 'Meta+A' : 'Control+A');
-    await new Promise((resolve) => setTimeout(resolve, 100));
-    await this.hotkey(process.platform === 'darwin' ? 'Meta+C' : 'Control+C');
-    await new Promise((resolve) => setTimeout(resolve, 100));
-    return readClipboard();
+    throw new Error('/history is temporarily disabled - the copy automation it relies on was causing stuck-key issues on the desktop.');
   }
 }

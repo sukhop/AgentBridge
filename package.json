@@ -1,7 +1,7 @@
 {
   "name": "agremote",
   "version": "1.0.0",
-  "description": "Control an Antigravity AI coding session from Telegram.",
+  "description": "Control and monitor AI coding agents from Telegram and Discord.",
   "type": "module",
   "main": "app.js",
   "bin": {
@@ -16,6 +16,7 @@
   "keywords": [
     "antigravity",
     "telegram",
+    "discord",
     "automation",
     "desktop"
   ],
@@ -24,6 +25,7 @@
   "dependencies": {
     "@nut-tree-fork/nut-js": "^4.2.6",
     "clipboardy": "^4.0.0",
+    "discord.js": "^14.27.0",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "js-yaml": "^5.2.1",

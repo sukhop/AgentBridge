@@ -1,12 +1,13 @@
 import { EventEmitter } from 'node:events';
-import { extractLastTask } from '../utils/conversation.js';
+import { EVENT_TYPES } from '../core/eventBus.js';
 
 export class NotificationService extends EventEmitter {
-  constructor({ adapter, sessionManager, logger, intervalMs, progressIntervalMs }) {
+  constructor({ adapter, sessionManager, logger, intervalMs, progressIntervalMs, eventBus }) {
     super();
     this.adapter = adapter;
     this.sessionManager = sessionManager;
     this.logger = logger;
+    this.eventBus = eventBus;
     this.intervalMs = intervalMs;
     this.progressIntervalMs = progressIntervalMs || 30000;
     this.timer = null;
@@ -58,9 +59,11 @@ export class NotificationService extends EventEmitter {
               currentTask: approval.command || approval.title
             });
             console.log(`[DIAGNOSTICS] Notification emitted: approval-required`);
+            const text = `⚠ ${session.projectName}\n\nApproval Required\n\nCommand:\n${approval.command || approval.title}`;
+            this.eventBus?.publish(EVENT_TYPES.APPROVAL_REQUIRED, { session, text, approval });
             this.emit('notification', {
               type: 'approval-required',
-              text: `⚠ ${session.projectName}\n\nApproval Required\n\nCommand:\n${approval.command || approval.title}`,
+              text,
               session,
               approval
             });
@@ -96,6 +99,7 @@ export class NotificationService extends EventEmitter {
           const text = getNotificationText(session.projectName, lastState, status.agentState);
           if (text) {
             console.log(`[DIAGNOSTICS] Notification emitted: ${status.agentState.toLowerCase()}`);
+            this.eventBus?.publish(mapStateToEventType(status.agentState), { session, text, status });
             this.emit('notification', {
               type: status.agentState.toLowerCase(),
               text,
@@ -119,8 +123,12 @@ export class NotificationService extends EventEmitter {
   // notification and no visibility in between. Fires whenever the window
   // title changes (a new file/step) or the progress interval elapses,
   // whichever comes first - so it reflects real progress, not just a timer.
-  // Each firing re-reads the actual conversation panel so the text reflects
-  // what the agent is doing *right now*, not a frozen echo of the first prompt.
+  //
+  // This intentionally does NOT trigger keyboard/mouse automation (e.g.
+  // reading the live conversation panel) on an unattended background timer -
+  // running that concurrently with other automation (or with the window not
+  // fully focused yet) risks a stuck key on the desktop. Use /status for an
+  // on-request read of the real conversation.
   async maybeEmitProgress(session) {
     const now = Date.now();
     const lastAt = this.lastProgressAt.get(session.id) || this.runningSince.get(session.id) || now;
@@ -135,30 +143,27 @@ export class NotificationService extends EventEmitter {
     const elapsed = formatElapsed(now - startedAt);
     const currentFile = (session.windowTitle || '').split(' - ')[0] || 'unknown';
 
-    let liveSnippet = null;
-    if (typeof this.adapter.copyConversation === 'function') {
-      try {
-        const history = await this.adapter.copyConversation(session);
-        liveSnippet = extractLastTask(history);
-      } catch (error) {
-        this.logger.debug('Live status snippet fetch failed', { sessionId: session.id, error: error.message });
-      }
-    }
-
     const lines = [`⏳ ${session.projectName}`, '', `Still working (${elapsed})`, `Current file: ${currentFile}`];
-    if (liveSnippet) {
-      lines.push(`Latest: ${liveSnippet}`);
-    } else if (session.currentTask) {
+    if (session.currentTask) {
       lines.push(`Task: ${session.currentTask}`);
     }
 
     console.log(`[DIAGNOSTICS] Notification emitted: progress`);
+    this.eventBus?.publish(EVENT_TYPES.TASK_PROGRESS, { session, text: lines.join('\n') });
     this.emit('notification', {
       type: 'progress',
       text: lines.join('\n'),
       session
     });
   }
+}
+
+function mapStateToEventType(agentState) {
+  const state = agentState.toLowerCase();
+  if (state === 'running') return EVENT_TYPES.TASK_STARTED;
+  if (state === 'completed' || state === 'finished') return EVENT_TYPES.TASK_COMPLETED;
+  if (state === 'error' || state === 'failed') return EVENT_TYPES.TASK_FAILED;
+  return EVENT_TYPES.TASK_STATUS;
 }
 
 function formatElapsed(ms) {

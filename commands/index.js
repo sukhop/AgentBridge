@@ -17,6 +17,8 @@ import { pushCommand } from './push.js';
 import { sessionsCommand } from './sessions.js';
 import { openCommand } from './open.js';
 import { useCommand } from './use.js';
+import { settingsCommand } from './settings.js';
+import { diffCommand } from './diff.js';
 
 export function registerCommands(router) {
   router.register('start', helpCommand);
@@ -43,6 +45,8 @@ export function registerCommands(router) {
   router.register('projects', sessionsCommand);
   router.register('use', useCommand);
   router.register('open', openCommand);
+  router.register('settings', settingsCommand);
+  router.register('diff', diffCommand);
 }
 
 async function projectCommand({ storage }) {
